@@ -9,23 +9,28 @@ class IndexController extends Controller
 {
     private $token = 'zayweixin';
 
-    public function index(Request $request)
+    public function index()
     {
-        $signature  = $request->signature;
-        $timestamp  = $request->timestamp;
-        $nonce      = $request->nonce;
-        $echostr    = $request->echostr;
+        $signature = $_GET['signature'];
+        $timestamp = $_GET['timestamp'];
+        $nonce = $_GET['nonce'];
 
-        $tmp_arr = [$this->token,$timestamp,$nonce];
-        sort( $tmp_arr );
+        $arr = array($this->token,$timestamp,$nonce);
+        sort($arr);
+        $tmpstr = sha1(implode( $arr ));
 
-        $tmp_str = sha1(implode($tmp_arr));
-
-        if($signature == $tmp_str){
-            echo $echostr;
+        if($tmpstr == $signature && $_GET['echostr']){
+            echo $_GET['echostr'];
+            exit;
         }else{
             $this->reponseMsg();
         }
+    }
+
+    //实例化回复控制器对象
+    private function getReplyObject()
+    {
+        return new ReplyController();
     }
 
     //判断消息类型并调用相应类型回复方法
@@ -44,11 +49,9 @@ class IndexController extends Controller
         $postObj = simplexml_load_string($postArr);
         //判断消息类型
         if(strtolower($postObj->MsgType == 'event')){
-//            echo 'event';
-//            $this->eventSubscribe($postObj);
+            $this->eventSubscribe($postObj);
         }else if(strtolower($postObj->MsgType) == 'text'){
-//            echo 'text';
-//            $this->textTypeMsg($postObj);
+            $this->textTypeMsg($postObj);
         }
 
     }
