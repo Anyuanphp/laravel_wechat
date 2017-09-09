@@ -17,7 +17,9 @@ class IndexController extends Controller
         $echostr    = $request->echostr;
 
         $tmp_arr = [$this->token,$timestamp,$nonce];
-        $tmp_str = sha1(implode(sort( $tmp_arr )));
+        sort( $tmp_arr );
+
+        $tmp_str = sha1(implode($tmp_arr));
 
         if($signature == $tmp_str){
             echo $echostr;
